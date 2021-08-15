@@ -1,4 +1,5 @@
-use rust_json::{json_parse, JsonElem::*, JsonParseErr::*};
+use rust_json::{json_parse, JsonElem, json, ToJson};
+use rust_json::{JsonElem::*, JsonParseErr::*};
 use std::collections::HashMap;
 
 #[test]
@@ -127,27 +128,49 @@ fn test_array() {
     );
 }
 
+macro_rules! map {
+    ($($key: expr => $val: expr), *) => {{
+        let mut hm = HashMap::new();
+        $( hm.insert(String::from($key), $val); )*
+        hm
+    }};
+}
+
 #[test]
 fn test_object() {
-    let mut obj = HashMap::new();
-    obj.insert(String::from("n"), Null);
-    obj.insert(String::from("f"), Bool(false));
-    obj.insert(String::from("t"), Bool(true));
-    obj.insert(String::from("i"), Number(123.0));
-    obj.insert(String::from("s"), Str(String::from("abc")));
-    obj.insert(
-        String::from("a"),
-        Array(vec![Number(1.0), Number(2.0), Number(3.0)]),
+    let obj = map!(
+        "n" => Null,
+        "f" => Bool(false),
+        "t" => Bool(true),
+        "i" => Number(123.0),
+        "s" => Str(String::from("abc")),
+        "a" => Array(vec![Number(1.0), Number(2.0), Number(3.0)]),
+        "o" => Object(map!("1" => Number(1.0), "2" => Number(2.0), "3" => Number(3.0)))
     );
-    obj.insert(String::from("o"), {
-        let mut o = HashMap::new();
-        o.insert(String::from("1"), Number(1.0));
-        o.insert(String::from("2"), Number(2.0));
-        o.insert(String::from("3"), Number(3.0));
-        Object(o)
-    });
+
     assert_eq!(
             Ok(Object(obj)),
             json_parse(" { \"n\" : null , \"f\" : false , \"t\" : true , \"i\" : 123 , \"s\" : \"abc\", \"a\" : [ 1, 2, 3 ],\"o\" : { \"1\" : 1, \"2\" : 2, \"3\" : 3 } } ")
         );
+}
+
+#[test]
+fn test_macro_json() {
+    assert_eq!(Ok(json!([])), json_parse("[]"));
+    assert_eq!(Ok(json!({})), json_parse("{}"));
+    assert_eq!(Ok(json!(null)), json_parse("null"));
+    assert_eq!(Ok(json!(true)), json_parse("true"));
+    assert_eq!(Ok(json!(false)), json_parse("false"));
+    assert_eq!(Ok(json!([1, [2, [3]]])), json_parse("[1,[2,[3]]]"));
+    assert_eq!(
+        Ok(json!({
+            "name": "John Doe",
+            "age": 43,
+            "phones": [
+                "+44 1234567",
+                "+44 2345678"
+            ]
+        })),
+        json_parse(r#"{"name": "John Doe","age": 43,"phones": ["+44 1234567","+44 2345678"]}"#)
+    );
 }

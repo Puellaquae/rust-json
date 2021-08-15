@@ -11,6 +11,81 @@ pub enum JsonElem {
     Object(HashMap<String, JsonElem>),
 }
 
+pub trait ToJson {
+    fn to_json(self) -> JsonElem;
+}
+
+impl ToJson for f64 {
+    fn to_json(self) -> JsonElem {
+        JsonElem::Number(self)
+    }
+}
+
+impl ToJson for i32 {
+    fn to_json(self) -> JsonElem {
+        JsonElem::Number(self as f64)
+    }
+}
+
+impl ToJson for bool {
+    fn to_json(self) -> JsonElem {
+        JsonElem::Bool(self)
+    }
+}
+
+impl ToJson for &str {
+    fn to_json(self) -> JsonElem {
+        JsonElem::Str(String::from(self))
+    }
+}
+
+#[macro_export]
+macro_rules! json {
+    (for_array [ $($val: expr)* ]) => {
+        JsonElem::Array(vec!($($val),*))
+    };
+
+    (for_array [ $($val: expr )* ] $elem:tt $($rest:tt)*) => {
+        json!(for_array [$($val)* json!($elem)] $($rest)*)
+    };
+
+    (for_object $obj:ident) => {
+    };
+
+    (for_object $obj:ident $key:tt : $val:tt) => {
+        json!(for_object $obj $key, json!($val), )
+    };
+
+    (for_object $obj:ident $key:tt : $val:tt, $($rest: tt)*) => {
+        json!(for_object $obj $key, json!($val), $($rest)*)
+    };
+
+    (for_object $obj:ident $key:expr, $val:expr, $($rest: tt)*) => {
+        $obj.insert(String::from($key), $val);
+        json!(for_object $obj $($rest)*)
+    };
+
+    (null) => {
+        JsonElem::Null
+    };
+
+    ([ $($val:tt),* ]) => {
+        json!(for_array [] $($val)*)
+    };
+
+    ({ $($val:tt)* }) => {
+        {
+            let mut hm:HashMap<String, JsonElem> = HashMap::new();
+            json!(for_object hm $($val)*);
+            JsonElem::Object(hm)
+        }
+    };
+
+    ($val: expr) => {
+        ToJson::to_json($val)
+    };
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum JsonParseErr {
     ExpectValue,
