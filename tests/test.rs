@@ -1,4 +1,4 @@
-use rust_json::{json, json_parse, JsonElem, JsonElem::*, JsonParseErr::*, ToJson};
+use rust_json::{js_object, json, json_parse, JsonElem, JsonElem::*, JsonParseErr::*, ToJson};
 use std::collections::HashMap;
 
 #[test]
@@ -203,6 +203,51 @@ fn test_to_json() {
             field_a: 1,
             field_b: true,
             field_c: String::from("123")
-        }.to_json())
+        }
+        .to_json())
+    )
+}
+
+fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+#[test]
+fn test_macro_js_object() {
+    let a = StructA {
+        field_a: 123,
+        field_b: true,
+        field_c: String::from("rust_json"),
+    };
+    assert_eq!(
+        Ok(js_object!({
+            a: {
+                b: [
+                    if a.field_b {
+                        let n = 123;
+                        add(n, a.field_a)
+                    } else {
+                        321
+                    },
+                    {
+                        c: {
+                            "a.0": a.field_a,
+                            "a.1": a.field_b,
+                            "a.2": a.field_c
+                        }
+                    },
+                    [
+                        null,
+                        [
+                            true,
+                            [
+                                null
+                            ]
+                        ]
+                    ]
+                ]
+            }
+        })),
+        json_parse(r#"{"a":{"b":[246,{"c":{"a.0":123,"a.1":true,"a.2":"rust_json"}},[null,[true,[null]]]]}}"#)
     )
 }

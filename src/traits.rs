@@ -33,3 +33,9 @@ impl ToJson for &str {
         JsonElem::Str(String::from(self))
     }
 }
+
+impl ToJson for String {
+    fn to_json(self) -> JsonElem {
+        JsonElem::Str(self)
+    }
+}
