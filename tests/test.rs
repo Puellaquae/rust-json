@@ -1,5 +1,4 @@
-use rust_json::{json_parse, JsonElem, json, ToJson};
-use rust_json::{JsonElem::*, JsonParseErr::*};
+use rust_json::{json, json_parse, JsonElem, JsonElem::*, JsonParseErr::*, ToJson};
 use std::collections::HashMap;
 
 #[test]
@@ -173,4 +172,37 @@ fn test_macro_json() {
         })),
         json_parse(r#"{"name": "John Doe","age": 43,"phones": ["+44 1234567","+44 2345678"]}"#)
     );
+}
+
+struct StructA {
+    field_a: i32,
+    field_b: bool,
+    field_c: String,
+}
+
+impl ToJson for StructA {
+    fn to_json(self) -> JsonElem {
+        Object(map!(
+            "field_a" => self.field_a.to_json(),
+            "field_b" => self.field_b.to_json(),
+            "field_c" => self.field_c.to_json()
+        ))
+    }
+}
+
+#[test]
+fn test_to_json() {
+    assert_eq!(Bool(true), true.to_json());
+    assert_eq!(Bool(false), false.to_json());
+    assert_eq!(Number(123.0), 123.to_json());
+    assert_eq!(Number(123.4), 123.4.to_json());
+    assert_eq!(Str(String::from("abcd")), "abcd".to_json());
+    assert_eq!(
+        json_parse(r#"{"field_a":1,"field_b":true,"field_c":"123"}"#),
+        Ok(StructA {
+            field_a: 1,
+            field_b: true,
+            field_c: String::from("123")
+        }.to_json())
+    )
 }
