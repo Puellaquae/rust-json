@@ -37,28 +37,22 @@ macro_rules! json {
     };
 
     ($val: expr) => {
-        $crate::ToJson::to_json($val)
+        $crate::ToJson::to_json(&$val)
     };
 }
 
 #[macro_export]
 macro_rules! js_object {
-    (for_array $vec:ident $val:tt, $($rest:tt)*) => {
-        $vec.push(js_object!($val));
-        js_object!(for_array $vec $($rest)*)
+    (for_array [$($elem:expr)*]) => {
+        vec![$($elem),*]
     };
 
-    (for_array $vec:ident $val:expr, $($rest:tt)*) => {
-        $vec.push(js_object!($val));
-        js_object!(for_array $vec $($rest)*)
+    (for_array [$($elem:expr)*] $val:tt , $($rest:tt)*) => {
+        js_object!(for_array [$($elem)* js_object!($val)] $($rest)*)
     };
 
-    (for_array $vec:ident $val:tt) => {
-        $vec.push(js_object!($val))
-    };
-
-    (for_array $vec:ident $val:expr) => {
-        println!("{:?}", js_object!($val))
+    (for_array [$($elem:expr)*] $val:tt) => {
+        js_object!(for_array [$($elem)* js_object!($val)])
     };
 
     (for_object $obj:ident $key:tt : $val:tt , $($rest:tt)*) => {
@@ -79,6 +73,25 @@ macro_rules! js_object {
         js_object!(obj_insert $obj $key, js_object!($val))
     };
 
+    (for_object $obj:ident $key:ident , $($rest:tt)*) => {
+        js_object!(obj_insert $obj $key, js_object!($key));
+        js_object!(for_object $obj $($rest)*)
+    };
+
+    (for_object $obj:ident $key:ident) => {
+        js_object!(obj_insert $obj $key, js_object!($key))
+    };
+
+    (for_object $obj:ident) => {
+    };
+
+    (obj_insert $obj:ident [ $key:expr ], $val: expr) => {
+        {
+            let key = ToString::to_string(&$key);
+            $obj.insert(String::from(key), $val);
+        }
+    };
+
     (obj_insert $obj:ident $key:tt, $val: expr) => {
         {
             let key = stringify!($key);
@@ -96,11 +109,7 @@ macro_rules! js_object {
     };
 
     ([ $($val:tt)* ]) => {
-        {
-            let mut vec = Vec::<$crate::JsonElem>::new();
-            js_object!(for_array vec $($val)*);
-            $crate::JsonElem::Array(vec)
-        }
+        $crate::JsonElem::Array(js_object!(for_array [] $($val)*))
     };
 
     ({ $($val:tt)* }) => {
@@ -112,6 +121,6 @@ macro_rules! js_object {
     };
 
     ($val: expr) => {
-        $crate::ToJson::to_json($val)
+        $crate::ToJson::to_json(&$val)
     };
 }

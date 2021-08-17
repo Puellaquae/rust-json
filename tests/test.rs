@@ -162,6 +162,14 @@ fn test_macro_json() {
     assert_eq!(Ok(json!(false)), json_parse("false"));
     assert_eq!(Ok(json!([1, [2, [3]]])), json_parse("[1,[2,[3]]]"));
     assert_eq!(
+        Ok(json!([{"a": 1, "b": 2}, {"a": 3, "b": 4}])),
+        json_parse(r#"[{"a": 1, "b": 2}, {"a": 3, "b": 4}]"#)
+    );
+    assert_eq!(
+        Ok(json!([{"a": 1, "b": 2}])),
+        json_parse(r#"[{"a": 1, "b": 2}]"#)
+    );
+    assert_eq!(
         Ok(json!({
             "name": "John Doe",
             "age": 43,
@@ -181,7 +189,7 @@ struct StructA {
 }
 
 impl ToJson for StructA {
-    fn to_json(self) -> JsonElem {
+    fn to_json(&self) -> JsonElem {
         Object(map!(
             "field_a" => self.field_a.to_json(),
             "field_b" => self.field_b.to_json(),
@@ -208,46 +216,22 @@ fn test_to_json() {
     )
 }
 
-fn add(a: i32, b: i32) -> i32 {
-    a + b
-}
-
 #[test]
 fn test_macro_js_object() {
-    let a = StructA {
-        field_a: 123,
-        field_b: true,
-        field_c: String::from("rust_json"),
-    };
-    assert_eq!(
-        Ok(js_object!({
-            a: {
-                b: [
-                    if a.field_b {
-                        let n = 123;
-                        add(n, a.field_a)
-                    } else {
-                        321
-                    },
-                    {
-                        c: {
-                            "a.0": a.field_a,
-                            "a.1": a.field_b,
-                            "a.2": a.field_c
-                        }
-                    },
-                    [
-                        null,
-                        [
-                            true,
-                            [
-                                null
-                            ]
-                        ]
-                    ]
-                ]
-            }
-        })),
-        json_parse(r#"{"a":{"b":[246,{"c":{"a.0":123,"a.1":true,"a.2":"rust_json"}},[null,[true,[null]]]]}}"#)
-    )
+    assert_eq!(js_object!([{"nest": [{}]}]), json!([{"nest": [{}]}]));
+    
+    let n = 1;
+    assert_eq!(js_object!([{n : n}, {n : n}]), json!([{"n" : 1}, {"n": 1}]));
+    assert_eq!(js_object!([{n : n * 2}, {n : n.to_string()}]), json!([{"n" : 2}, {"n": "1"}]));
+
+    assert_eq!(js_object!([1, [2, [3]]]), json!([1, [2, [3]]]));
+    assert_eq!(js_object!({a: {b: {c: {}}}}), json!({"a": {"b": {"c": {}}}}));
+    assert_eq!(js_object!({a: [{b: [{c: [{}]}]}]}), json!({"a": [{"b": [{"c": [{}]}]}]}));
+
+    assert_eq!(js_object!({n}), json!({"n": 1}));
+
+    let b = true;
+
+    assert_eq!(js_object!([{n, b}]), json!([{"n": 1, "b": true}]));
+    assert_eq!(js_object!([{[n + 21]: n}, {[n + 12]: b}]), json!([{"22": 1}, {"13": true}]));
 }

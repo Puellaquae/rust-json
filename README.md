@@ -70,45 +70,25 @@ fn example() {
 ### 以 js 的风格构造 JsonElem
 
 ```rust
-use rust_json::js_object;
+use rust_json::{js_object};
 
-struct A(i32, bool);
-
-fn add(a: i32, b: i32) -> i32 {
-    a + b
+fn proc(n: i32) -> i32 {
+    n * n + n / 2
 }
 
 fn main() {
-    let a = A(12, true);
-    println!(
-        "{:#?}",
-        js_object!({
-            a: {
-                b: [
-                    if a.1 {
-                        let n = 123;
-                        add(n, a.0) 
-                    } else {
-                        321 
-                    }, // 可以接受一个语句作为值
-                    {
-                        c: {
-                            "a.0": a.0,
-                            "a.1": a.1 // 但都不接受末尾的逗号
-                        }
-                    },
-                    [
-                        null,
-                        [
-                            true, 
-                            [
-                                null
-                            ]
-                        ]
-                    ]
-                ]
-            }
-        })
-    );
+    let a = true;
+    let n = 32;
+    let j = js_object!([
+        {
+            a // 属性的简洁表示 Property Shorthand
+        },
+        {
+            // 使用表达式作为值
+            proc_n: if n % 2 == 0 { proc(n) + 1 } else { 0 }, 
+            [n * 12]: n * 12 // 属性名表达式 Computed Property Names
+        }
+    ]);
+    println!("{:#?}", j);
 }
 ```
