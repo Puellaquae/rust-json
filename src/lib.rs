@@ -1,9 +1,10 @@
+mod macros;
 mod parser;
 mod traits;
-mod macros;
+mod serialize;
 
-pub use traits::ToJson;
 pub use parser::json_parse;
+pub use traits::ToJson;
 
 #[derive(Debug, PartialEq)]
 pub enum JsonElem {

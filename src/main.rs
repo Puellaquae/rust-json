@@ -16,5 +16,5 @@ fn main() {
             [n * 12]: n * 12
         }
     ]);
-    println!("{:#?}", j);
+    println!("{}", j);
 }

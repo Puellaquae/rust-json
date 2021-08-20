@@ -1,6 +1,8 @@
 # rust-json
 
-学习 rust 所写的 JSON 解析器。
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Puellaquae/rust-json/Rust?label=Build%20%26%20Test)
+
+学习 rust 所写的 JSON 解析与序列化工具。
 
 解析的编写参考了 miloyip 的 [json-tutorial](https://github.com/miloyip/json-tutorial)。
 
@@ -33,7 +35,7 @@ fn example() {
         ]
     }"#);
 
-    println!("{:?}", j);
+    println!("{}", j);
 }
 ```
 
@@ -63,7 +65,7 @@ fn example() {
         }
     );
 
-    println!("{:?}", j);
+    println!("{}", j);
 }
 ```
 
@@ -89,6 +91,6 @@ fn main() {
             [n * 12]: n * 12 // 属性名表达式 Computed Property Names
         }
     ]);
-    println!("{:#?}", j);
+    println!("{}", j);
 }
 ```
