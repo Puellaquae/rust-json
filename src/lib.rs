@@ -1,7 +1,7 @@
 mod macros;
 mod parser;
-mod traits;
 mod serialize;
+mod traits;
 
 pub use parser::json_parse;
 pub use traits::ToJson;

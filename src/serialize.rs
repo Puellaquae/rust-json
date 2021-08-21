@@ -47,8 +47,8 @@ fn string_escape(str: &String) -> String {
                     HEX_DIGITS[(b >> 4) as usize],
                     HEX_DIGITS[(b & 0xF) as usize],
                 ]);
-            },
-            None(b) => buf.push(b)
+            }
+            None(b) => buf.push(b),
         };
     }
     String::from_utf8(buf).unwrap()
@@ -64,7 +64,7 @@ impl Display for JsonElem {
             Self::Array(a) => write!(
                 f,
                 "[{}]",
-                a.into_iter()
+                a.iter()
                     .map(|e| e.to_string())
                     .collect::<Vec<String>>()
                     .join(",")
@@ -72,7 +72,7 @@ impl Display for JsonElem {
             Self::Object(o) => write!(
                 f,
                 "{{{}}}",
-                o.into_iter()
+                o.iter()
                     .map(|(k, v)| format!("\"{}\":{}", string_escape(k), v))
                     .collect::<Vec<String>>()
                     .join(",")

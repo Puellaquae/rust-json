@@ -110,17 +110,17 @@ fn json_parse_string(json: &mut &str) -> Result<JsonElem, JsonParseErr> {
         match chars.next() {
             Some('"') => break,
             Some('\\') => match chars.next() {
-                Some('"') => str_buf.push('"' as u8),
-                Some('\\') => str_buf.push('\\' as u8),
-                Some('/') => str_buf.push('/' as u8),
+                Some('"') => str_buf.push(b'"'),
+                Some('\\') => str_buf.push(b'\\'),
+                Some('/') => str_buf.push(b'/'),
                 Some('b') => str_buf.push(8),
                 Some('f') => str_buf.push(12),
-                Some('n') => str_buf.push('\n' as u8),
-                Some('r') => str_buf.push('\r' as u8),
-                Some('t') => str_buf.push('\t' as u8),
+                Some('n') => str_buf.push(b'\n'),
+                Some('r') => str_buf.push(b'\r'),
+                Some('t') => str_buf.push(b'\t'),
                 Some('u') => {
                     if let Some(res) = try_get_hex4(&mut chars) {
-                        if 0xd800 <= res && res <= 0xdbff {
+                        if (0xd800..=0xdbff).contains(&res) {
                             if chars.next() != Some('\\') {
                                 return Err(JsonParseErr::InvalidUnicodeSurrogate);
                             }
@@ -160,7 +160,7 @@ fn json_parse_string(json: &mut &str) -> Result<JsonElem, JsonParseErr> {
 
 fn is_hex_digit(c: Option<char>) -> bool {
     if let Some(ch) = c {
-        return ('0' <= ch && ch <= '9') || ('a' <= ch && ch <= 'f') || ('A' <= ch && ch <= 'F');
+        ('0'..='9').contains(&ch) || ('a'..='f').contains(&ch) || ('A'..='F').contains(&ch)
     } else {
         false
     }
@@ -185,7 +185,7 @@ fn try_get_hex4(chars: &mut Chars) -> Option<u32> {
             (hex_to_u32(c1.unwrap()) << 12)
                 + (hex_to_u32(c2.unwrap()) << 8)
                 + (hex_to_u32(c3.unwrap()) << 4)
-                + (hex_to_u32(c4.unwrap()) << 0),
+                + (hex_to_u32(c4.unwrap())),
         )
     } else {
         None
@@ -220,7 +220,7 @@ fn json_parse_array(json: &mut &str) -> Result<JsonElem, JsonParseErr> {
     assert_eq!(Some('['), chars.next());
     let mut arr: Vec<JsonElem> = Vec::new();
     *json = chars.as_str().trim();
-    if let Some(new_json) = json.strip_prefix("]") {
+    if let Some(new_json) = json.strip_prefix(']') {
         *json = new_json;
         return Ok(JsonElem::Array(arr));
     }
@@ -232,9 +232,9 @@ fn json_parse_array(json: &mut &str) -> Result<JsonElem, JsonParseErr> {
             return res;
         }
         *json = json.trim();
-        if let Some(new_json) = json.strip_prefix(",") {
+        if let Some(new_json) = json.strip_prefix(',') {
             *json = new_json.trim();
-        } else if let Some(new_json) = json.strip_prefix("]") {
+        } else if let Some(new_json) = json.strip_prefix(']') {
             *json = new_json;
             return Ok(JsonElem::Array(arr));
         } else {
@@ -248,7 +248,7 @@ fn json_parse_object(json: &mut &str) -> Result<JsonElem, JsonParseErr> {
     assert_eq!(Some('{'), chars.next());
     let mut obj = HashMap::new();
     *json = chars.as_str().trim();
-    if let Some(new_json) = json.strip_prefix("}") {
+    if let Some(new_json) = json.strip_prefix('}') {
         *json = new_json;
         return Ok(JsonElem::Object(obj));
     }
@@ -259,9 +259,9 @@ fn json_parse_object(json: &mut &str) -> Result<JsonElem, JsonParseErr> {
             Err(e) => return Err(e),
         };
         *json = json.trim();
-        if let Some(new_json) = json.strip_prefix(",") {
+        if let Some(new_json) = json.strip_prefix(',') {
             *json = new_json.trim();
-        } else if let Some(new_json) = json.strip_prefix("}") {
+        } else if let Some(new_json) = json.strip_prefix('}') {
             *json = new_json;
             return Ok(JsonElem::Object(obj));
         } else {
@@ -271,7 +271,7 @@ fn json_parse_object(json: &mut &str) -> Result<JsonElem, JsonParseErr> {
 }
 
 fn json_parse_member(json: &mut &str) -> Result<(String, JsonElem), JsonParseErr> {
-    if !json.starts_with("\"") {
+    if !json.starts_with('"') {
         return Err(JsonParseErr::ObjectMissKey);
     }
     let key;
@@ -281,7 +281,7 @@ fn json_parse_member(json: &mut &str) -> Result<(String, JsonElem), JsonParseErr
         _ => panic!("json_parse_string shouldn't return unexpected values other than JsonElemL::Str and Err")
     };
     *json = json.trim();
-    match json.strip_prefix(":") {
+    match json.strip_prefix(':') {
         Some(new_json) => *json = new_json.trim(),
         None => return Err(JsonParseErr::ObjectMissColon),
     };
