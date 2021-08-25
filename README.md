@@ -94,3 +94,31 @@ fn main() {
     println!("{}", j);
 }
 ```
+
+### `#[derive(ToJson)]`
+```rust
+use rust_json::{ToJson}
+
+#[derive(ToJson)]
+struct Simple {
+    n: f64,
+    b: bool,
+}
+
+#[derive(ToJson)]
+struct Nest {
+    a: Vec<f64>,
+    s: Simple,
+}
+
+fn main() {
+    let s = Simple { n: 12.3, b: true };
+    println!("{}", s.to_json());
+
+    let n = Nest {
+        a: vec![1.2, 2.3],
+        s: s,
+    };
+    println!("{}", n.to_json());
+}
+```

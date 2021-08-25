@@ -4,9 +4,14 @@ mod serialize;
 mod traits;
 
 pub use parser::json_parse;
+pub use traits::FromJson;
 pub use traits::ToJson;
 
-#[derive(Debug, PartialEq)]
+pub use rust_json_derive::ToJson;
+
+use std::str::FromStr;
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum JsonElem {
     Null,
     Bool(bool),
@@ -16,7 +21,20 @@ pub enum JsonElem {
     Object(std::collections::HashMap<String, JsonElem>),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+impl JsonElem {
+    pub fn get<T: FromJson>(self) -> Option<T> {
+        T::from_json(self)
+    }
+}
+
+impl FromStr for JsonElem {
+    type Err = JsonParseErr;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        json_parse(s)
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum JsonParseErr {
     ExpectValue,
     InvalidValue,
