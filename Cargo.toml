@@ -1,16 +1,6 @@
-[package]
-name = "rust_json"
-version = "0.1.0"
-authors = ["Puellaquae <shentukeqin@hotmail.com>"]
-edition = "2018"
-repository = "https://github.com/Puellaquae/rust-json"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-rust_json_derive = {path = "rust_json_derive/"}
-
 [workspace]
 members = [
+    "rust_json",
     "rust_json_derive",
+    "rust_json_test"
 ]

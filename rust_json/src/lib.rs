@@ -7,8 +7,6 @@ pub use parser::json_parse;
 pub use traits::FromJson;
 pub use traits::ToJson;
 
-pub use rust_json_derive::ToJson;
-
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Clone)]

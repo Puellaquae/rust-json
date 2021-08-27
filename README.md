@@ -72,7 +72,7 @@ fn example() {
 ### 以 js 的风格构造 JsonElem
 
 ```rust
-use rust_json::{js_object};
+use rust_json::js_object;
 
 fn proc(n: i32) -> i32 {
     n * n + n / 2
@@ -97,7 +97,8 @@ fn main() {
 
 ### `#[derive(ToJson)]`
 ```rust
-use rust_json::{ToJson}
+use rust_json::ToJson;
+use rust_json_derive::ToJson;
 
 #[derive(ToJson)]
 struct Simple {
