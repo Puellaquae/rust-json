@@ -11,15 +11,65 @@ use std::ops;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum JsonElem {
+
+    /// Represents a JSON null value.
+    /// 
+    /// ```
+    /// # use rust_json::json;
+    /// let j = json!(null);
+    /// ```
     Null,
+
+    /// Represents a JSON boolean.
+    /// 
+    /// ```
+    /// # use rust_json::json;
+    /// let j = json!(true);
+    /// ```
     Bool(bool),
+
+    /// Represents a JSON number, storing in `f64`.
+    /// 
+    /// ```
+    /// # use rust_json::json;
+    /// let j = json!(3.14);
+    /// ```
     Number(f64),
+
+    /// Represents a JSON string.
+    /// 
+    /// ```
+    /// # use rust_json::json;
+    /// let j = json!("abc");
+    /// ```
     Str(String),
+
+    /// Represents a JSON array.
+    /// 
+    /// ```
+    /// # use rust_json::json;
+    /// let j = json!(["an", "array"]);
+    /// ```
     Array(Vec<JsonElem>),
+
+    /// Represents a JSON object.
+    /// 
+    /// ```
+    /// # use rust_json::json;
+    /// let j = json!({"an": "object"});
+    /// ```
     Object(std::collections::HashMap<String, JsonElem>),
 }
 
 impl JsonElem {
+
+    /// Get the value stored in `JsonElem` and desrialize into `T`.
+    /// 
+    /// ```
+    /// # use rust_json::json;
+    /// assert_eq!(Some(12.3), json!(12.3).get());
+    /// assert_eq!(None, json!("abc").get::<bool>());
+    /// ```
     pub fn get<T: FromJson>(self) -> Option<T> {
         T::from_json(self)
     }
@@ -31,9 +81,11 @@ impl JsonElem {
     pub fn is_bool(&self) -> bool {
         matches!(self, JsonElem::Bool(_))
     }
+
     pub fn is_string(&self) -> bool {
         matches!(self, JsonElem::Str(_))
     }
+
     pub fn is_array(&self) -> bool {
         matches!(self, JsonElem::Array(_))
     }

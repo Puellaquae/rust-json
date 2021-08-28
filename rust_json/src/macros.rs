@@ -1,3 +1,15 @@
+/// Construct `JsonElem` with JSON syntax
+///
+/// ```
+/// # use rust_json::json;
+/// let value = json!({
+///     "code": 404,
+///     "success": false,
+///     "errors": [
+///         {"code": 1234, "description": null}
+///     ]
+/// });
+/// ```
 #[macro_export]
 macro_rules! json {
     (@for_array [ $($val:expr)* ]) => {
@@ -41,6 +53,26 @@ macro_rules! json {
     };
 }
 
+/// Construct `JsonElem` with JS syntax
+///
+/// ```
+/// # use rust_json::js_object;
+/// let code = 404;
+/// let error_code = 1234;
+/// let error_description: Option<String> = None;
+///
+/// let value = js_object!({
+///     code, // Property Shorthand
+///     success: code == 200, // Expressions
+///     errors: [
+///         {
+///             [error_code]: error_description // Computed Property Names
+///         }
+///     ]
+/// });
+/// ```
+///
+/// Any type interpolated into an array element or a object value must implement `ToJson` trait, while any type interpolated into a object key must implement `ToString` trait.
 #[macro_export]
 macro_rules! js_object {
     (@for_array [$($elem:expr)*]) => {
