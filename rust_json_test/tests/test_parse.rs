@@ -116,7 +116,7 @@ fn test_array() {
             Array(vec![Number(0.0), Number(1.0)]),
             Array(vec![Number(0.0), Number(1.0), Number(2.0)]),
         ])),
-        json_parse("[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]")
+        "[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]".parse()
     );
 }
 
@@ -142,6 +142,6 @@ fn test_object() {
 
     assert_eq!(
             Ok(Object(obj)),
-            json_parse(" { \"n\" : null , \"f\" : false , \"t\" : true , \"i\" : 123 , \"s\" : \"abc\", \"a\" : [ 1, 2, 3 ],\"o\" : { \"1\" : 1, \"2\" : 2, \"3\" : 3 } } ")
+            " { \"n\" : null , \"f\" : false , \"t\" : true , \"i\" : 123 , \"s\" : \"abc\", \"a\" : [ 1, 2, 3 ],\"o\" : { \"1\" : 1, \"2\" : 2, \"3\" : 3 } } ".parse()
         );
 }

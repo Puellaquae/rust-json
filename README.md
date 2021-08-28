@@ -35,7 +35,7 @@ fn example() {
         ]
     }"#);
 
-    println!("{}", j);
+    println!("{}", j["S"]);
 }
 ```
 
@@ -65,7 +65,7 @@ fn example() {
         }
     );
 
-    println!("{}", j);
+    println!("{}", j["S"]);
 }
 ```
 

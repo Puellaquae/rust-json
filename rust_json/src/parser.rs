@@ -1,6 +1,14 @@
 use crate::{JsonElem, JsonParseErr};
 use std::collections::HashMap;
 use std::str::Chars;
+use std::str::FromStr;
+
+impl FromStr for JsonElem {
+    type Err = JsonParseErr;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        json_parse(s)
+    }
+}
 
 pub fn json_parse(json: &str) -> Result<JsonElem, JsonParseErr> {
     let mut json_trim = json.trim();
