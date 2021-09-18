@@ -112,6 +112,14 @@ struct Nest {
     s: Simple,
 }
 
+#[derive(ToJson)]
+enum Enum {
+    Unit,
+    One(i32),
+    Two(i32, i32),
+    Cmpx { a: i32, b: i32, c: i32 },
+}
+
 fn main() {
     let s = Simple { n: 12.3, b: true };
     println!("{}", s.to_json());
@@ -121,5 +129,14 @@ fn main() {
         s: s,
     };
     println!("{}", n.to_json());
+
+    let u = E::Unit;
+    let o = E::One(1);
+    let t = E::Two(1, 2);
+    let c = E::Cmpx { a: 1, b: 2, c: 3 };
+    println!("{}", u.to_json());
+    println!("{}", o.to_json());
+    println!("{}", t.to_json());
+    println!("{}", c.to_json());
 }
 ```

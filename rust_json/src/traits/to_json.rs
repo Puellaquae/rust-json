@@ -1,6 +1,7 @@
 use crate::JsonElem;
 use std::collections::HashMap;
 
+/// Copy and box into `JsonElem`
 pub trait ToJson {
     fn to_json(&self) -> JsonElem;
 }

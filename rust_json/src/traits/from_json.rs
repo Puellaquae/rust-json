@@ -1,6 +1,7 @@
 use crate::JsonElem;
 use std::collections::HashMap;
 
+/// Get the data in `JsonElem` and box into `Self`
 pub trait FromJson: Sized {
     fn from_json(json: JsonElem) -> Option<Self>;
 }

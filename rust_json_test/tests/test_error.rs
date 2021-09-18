@@ -1,38 +1,4 @@
-use rust_json::{js_object, json, json_parse, JsonParseErr::*};
-
-#[test]
-fn test_macro_js_object() {
-    assert_eq!(js_object!([{"nest": [{}]}]), json!([{"nest": [{}]}]));
-    let n = 1;
-    assert_eq!(
-        js_object!([{ n: n }, { n: n }]),
-        json!([{"n" : 1}, {"n": 1}])
-    );
-    assert_eq!(
-        js_object!([{n : n * 2}, {n : n.to_string()}]),
-        json!([{"n" : 2}, {"n": "1"}])
-    );
-
-    assert_eq!(js_object!([1, [2, [3]]]), json!([1, [2, [3]]]));
-    assert_eq!(
-        js_object!({a: {b: {c: {}}}}),
-        json!({"a": {"b": {"c": {}}}})
-    );
-    assert_eq!(
-        js_object!({a: [{b: [{c: [{}]}]}]}),
-        json!({"a": [{"b": [{"c": [{}]}]}]})
-    );
-
-    assert_eq!(js_object!({ n }), json!({"n": 1}));
-
-    let b = true;
-
-    assert_eq!(js_object!([{n, b}]), json!([{"n": 1, "b": true}]));
-    assert_eq!(
-        js_object!([{ [n + 21]: n }, { [n + 12]: b }]),
-        json!([{"22": 1}, {"13": true}])
-    );
-}
+use rust_json::{json_parse, JsonParseErr::*};
 
 #[test]
 fn test_expect_value() {
