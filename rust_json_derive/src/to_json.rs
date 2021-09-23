@@ -1,5 +1,4 @@
 use proc_macro::TokenStream;
-
 use quote::quote;
 use syn::{DataEnum, DataStruct, Fields, Ident, Index, Variant};
 use proc_macro2::Span;
@@ -36,11 +35,10 @@ pub fn serialize_enum(ident: Ident, enum_data: DataEnum) -> TokenStream {
 fn serialize_fields(ident: &Ident, fields: Fields) -> proc_macro2::TokenStream {
     match fields {
         Fields::Named(_) => {
-            let s: Vec<_> = fields
+            let s = fields
                 .iter()
                 .map(|f| f.ident.as_ref())
-                .map(|i| quote!(hm.insert(stringify!(#i).to_string(), self.#i.to_json());))
-                .collect();
+                .map(|i| quote!(hm.insert(stringify!(#i).to_string(), self.#i.to_json());));
             quote!(
                 {
                     let mut hm = std::collections::HashMap::<String, rust_json::JsonElem>::new();
@@ -50,12 +48,11 @@ fn serialize_fields(ident: &Ident, fields: Fields) -> proc_macro2::TokenStream {
             )
         }
         Fields::Unnamed(_) => {
-            let s: Vec<_> = fields
+            let s = fields
                 .iter()
                 .enumerate()
                 .map(|(i, _)| Index::from(i))
-                .map(|i| quote!(vec.push(self.#i.to_json());))
-                .collect();
+                .map(|i| quote!(vec.push(self.#i.to_json());));
             quote!(
                 {
                     let mut vec = Vec::<rust_json::JsonElem>::new();
@@ -78,7 +75,6 @@ fn serialize_varient(ident: &Ident, variant: &Variant) -> proc_macro2::TokenStre
             quote!(#ident::#var_ident => rust_json::JsonElem::Str(stringify!(#var_ident).to_string()))
         }
         Fields::Unnamed(_) if fields.len() == 1 => {
-            //let field = Ident::new("__field", Span::call_site());
             quote!(#ident::#var_ident(field) => {
                 let mut hm = std::collections::HashMap::<String, rust_json::JsonElem>::new();
                 hm.insert(stringify!(#var_ident).to_string(), field.to_json());
