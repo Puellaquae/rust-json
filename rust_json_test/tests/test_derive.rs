@@ -1,13 +1,13 @@
 use rust_json::{json, json_parse, FromJson, ToJson};
 use rust_json_derive::{FromJson, ToJson};
 
-#[derive(ToJson)]
+#[derive(Debug, PartialEq, ToJson, FromJson)]
 struct S {
     n: f64,
     b: bool,
 }
 
-#[derive(ToJson)]
+#[derive(Debug, PartialEq, ToJson, FromJson)]
 struct N {
     a: Vec<f64>,
     s: S,
@@ -16,10 +16,10 @@ struct N {
 #[derive(Debug, PartialEq, ToJson, FromJson)]
 struct Unit;
 
-#[derive(ToJson)]
+#[derive(Debug, PartialEq, ToJson, FromJson)]
 struct T(N, Unit);
 
-#[derive(ToJson)]
+#[derive(Debug, PartialEq, ToJson, FromJson)]
 enum E {
     Unit,
     One(i32),
@@ -65,6 +65,24 @@ fn test_derive_to_json_enum() {
 
 #[test]
 fn test_derive_from_json_struct() {
-    let u: Unit = json_parse("\"Unit\"").unwrap().get().unwrap();
-    assert_eq!(Unit, u);
+    let s = S { n: 12.3, b: true };
+    assert_eq!(Some(s), s.to_json().get());
+
+    let n = N {
+        a: vec![1.2, 2.3],
+        s: s,
+    };
+    assert_eq!(
+        Some(n),
+        n.to_json().get()
+    );
+
+    let u = Unit;
+    assert_eq!(Some(u), u.to_json().get());
+
+    let t = T(n, u);
+    assert_eq!(
+        Some(t),
+        t.to_json().get()
+    );
 }

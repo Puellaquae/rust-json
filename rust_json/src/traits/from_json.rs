@@ -46,6 +46,16 @@ impl FromJson for Vec<JsonElem> {
     }
 }
 
+impl<T: FromJson> FromJson for Vec<T> {
+    fn from_json(json: JsonElem) -> Option<Vec<T>> {
+        if let JsonElem::Array(a) = json {
+            unimplemented!()
+        } else {
+            None
+        }
+    }
+}
+
 impl FromJson for HashMap<String, JsonElem> {
     fn from_json(json: JsonElem) -> Option<HashMap<String, JsonElem>> {
         if let JsonElem::Object(o) = json {
