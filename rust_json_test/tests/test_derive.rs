@@ -89,3 +89,15 @@ fn test_derive_from_json_struct() {
     let t = T(n, u);
     assert_eq!(t, t.to_json().get().unwrap());
 }
+
+#[test]
+fn test_derive_from_json_enum() {
+    let u = E::Unit;
+    let o = E::One(1);
+    let t = E::Two(1, 2);
+    let c = E::Cmpx { a: 1, b: 2, c: 3 };
+    assert_eq!(u, u.to_json().get().unwrap());
+    assert_eq!(o, o.to_json().get().unwrap());
+    assert_eq!(t, t.to_json().get().unwrap());
+    assert_eq!(c, c.to_json().get().unwrap());
+}
