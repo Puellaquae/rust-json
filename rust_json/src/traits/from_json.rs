@@ -16,6 +16,16 @@ impl FromJson for f64 {
     }
 }
 
+impl FromJson for i32 {
+    fn from_json(json: JsonElem) -> Option<i32> {
+        if let JsonElem::Number(n) = json {
+            Some(n as i32)
+        } else {
+            None
+        }
+    }
+}
+
 impl FromJson for bool {
     fn from_json(json: JsonElem) -> Option<bool> {
         if let JsonElem::Bool(b) = json {
@@ -28,6 +38,7 @@ impl FromJson for bool {
 
 impl FromJson for String {
     fn from_json(json: JsonElem) -> Option<String> {
+        println!("FromJson for String: {}", json);
         if let JsonElem::Str(s) = json {
             Some(s)
         } else {
@@ -49,7 +60,7 @@ impl FromJson for Vec<JsonElem> {
 impl<T: FromJson> FromJson for Vec<T> {
     fn from_json(json: JsonElem) -> Option<Vec<T>> {
         if let JsonElem::Array(a) = json {
-            unimplemented!()
+            Some(a.into_iter().map(|v| v.get().unwrap()).collect())
         } else {
             None
         }
