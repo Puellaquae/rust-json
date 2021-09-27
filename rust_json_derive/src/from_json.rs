@@ -1,9 +1,17 @@
-use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
-use syn::{DataEnum, DataStruct, Fields, Ident, Variant};
+use syn::{Data, DeriveInput, DataEnum, DataStruct, Fields, Ident, Variant, Result, Error};
 
-pub fn deserialize_struct(ident: Ident, struct_data: DataStruct) -> TokenStream {
+pub fn expand_deserialize(input: DeriveInput) -> Result<proc_macro2::TokenStream> {
+    let ident = input.ident;
+    match input.data {
+        Data::Struct(struct_data) => Ok(deserialize_struct(ident, struct_data)),
+        Data::Enum(enum_data) => Ok(deserialize_enum(ident, enum_data)),
+        Data::Union(_) => Err(Error::new(ident.span(), "rust_json_derive not support union!")),
+    }
+}
+
+fn deserialize_struct(ident: Ident, struct_data: DataStruct) -> proc_macro2::TokenStream {
     let s = deserialize_fields(&ident, struct_data.fields);
     quote!(
         impl rust_json::FromJson for #ident {
@@ -12,10 +20,9 @@ pub fn deserialize_struct(ident: Ident, struct_data: DataStruct) -> TokenStream 
             }
         }
     )
-    .into()
 }
 
-pub fn deserialize_enum(ident: Ident, enum_data: DataEnum) -> TokenStream {
+fn deserialize_enum(ident: Ident, enum_data: DataEnum) -> proc_macro2::TokenStream {
     let units = deserialize_enum_units(&ident, &enum_data);
     let tags = deserialize_enum_tags(&ident, &enum_data);
     quote!(
@@ -45,7 +52,6 @@ pub fn deserialize_enum(ident: Ident, enum_data: DataEnum) -> TokenStream {
             }
         }
     )
-    .into()
 }
 
 fn deserialize_fields(ident: &Ident, fields: Fields) -> proc_macro2::TokenStream {
@@ -171,7 +177,7 @@ fn deserialize_enum_tag(ident: &Ident, variant: &Variant) -> proc_macro2::TokenS
                 }
             )
         }
-        Fields::Unit => panic!(),
+        Fields::Unit => unreachable!(),
     };
     quote!(stringify!(#var_ident) => #val,)
 }

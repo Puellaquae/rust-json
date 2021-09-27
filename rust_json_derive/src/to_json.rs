@@ -1,10 +1,18 @@
-use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
-use syn::{DataEnum, DataStruct, Fields, Ident, Index, Variant};
+use syn::{DeriveInput, Data, DataEnum, DataStruct, Fields, Ident, Index, Variant, Result, Error};
 
-pub fn serialize_struct(ident: Ident, struct_data: DataStruct) -> TokenStream {
-    let s = serialize_fields(&ident, struct_data.fields);
+pub fn expand_serialize(input: DeriveInput) -> Result<proc_macro2::TokenStream> {
+    let ident = &input.ident;
+    match input.data {
+        Data::Struct(struct_data) => Ok(serialize_struct(ident, struct_data)),
+        Data::Enum(enum_data) => Ok(serialize_enum(ident, enum_data)),
+        Data::Union(_) => Err(Error::new(ident.span(), "rust_json_derive not support union!"))
+    }
+}
+
+fn serialize_struct(ident: &Ident, struct_data: DataStruct) -> proc_macro2::TokenStream {
+    let s = serialize_fields(ident, struct_data.fields);
     quote!(
         impl rust_json::ToJson for #ident {
             fn to_json(&self) -> rust_json::JsonElem {
@@ -12,12 +20,11 @@ pub fn serialize_struct(ident: Ident, struct_data: DataStruct) -> TokenStream {
             }
         }
     )
-    .into()
 }
 
-pub fn serialize_enum(ident: Ident, enum_data: DataEnum) -> TokenStream {
+fn serialize_enum(ident: &Ident, enum_data: DataEnum) -> proc_macro2::TokenStream {
     let variants = enum_data.variants;
-    let s = variants.iter().map(|v| serialize_varient(&ident, v));
+    let s = variants.iter().map(|v| serialize_varient(ident, v));
     quote!(
         impl rust_json::ToJson for #ident {
             fn to_json(&self) -> rust_json::JsonElem {
@@ -27,7 +34,6 @@ pub fn serialize_enum(ident: Ident, enum_data: DataEnum) -> TokenStream {
             }
         }
     )
-    .into()
 }
 
 fn serialize_fields(ident: &Ident, fields: Fields) -> proc_macro2::TokenStream {
