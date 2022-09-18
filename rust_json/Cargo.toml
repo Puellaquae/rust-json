@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = ["Puellaquae <shentukeqin@hotmail.com>"]
 edition = "2018"
 repository = "https://github.com/Puellaquae/rust-json"
+keywords = ["json"]
+description = "A simple JSON serializer and deserializer"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

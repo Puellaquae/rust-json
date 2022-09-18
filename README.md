@@ -2,15 +2,15 @@
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Puellaquae/rust-json/Rust?label=Build%20%26%20Test)
 
-学习 rust 所写的 JSON 解析与序列化工具。
+学习 rust 所写的 JSON 解析与序列化工具。 JSON serializer and deserializer written for learning rust.
 
-解析的编写参考了 miloyip 的 [json-tutorial](https://github.com/miloyip/json-tutorial)。
+解析的编写参考了 miloyip 的 [json-tutorial](https://github.com/miloyip/json-tutorial)。 Parser is learned from miloyip's [json-tutorial](https://github.com/miloyip/json-tutorial).
 
-Rust 宏的编写参考了 [Serde JSON](https://github.com/serde-rs/json)。
+Rust 宏的编写参考了 [Serde JSON](https://github.com/serde-rs/json)。 Marco is learned from [Serde JSON](https://github.com/serde-rs/json).
 
-## 功能
+## 功能 / Feature
 
-### 从字符串解析 json
+### 从字符串解析 json / Parse json from string
 
 ```rust
 use rust_json::json_parse;
@@ -39,7 +39,7 @@ fn example() {
 }
 ```
 
-### 以 json 的风格构造 JsonElem
+### 以 json 的风格构造 JsonElem / Construct JsonElem with json literal
 
 ```rust
 use rust_json::json;
@@ -69,7 +69,7 @@ fn example() {
 }
 ```
 
-### 以 js 的风格构造 JsonElem
+### 以 js 的风格构造 JsonElem / Construct JsonElem with js object literal style
 
 ```rust
 use rust_json::js_object;
@@ -86,7 +86,7 @@ fn main() {
             a // 属性的简洁表示 Property Shorthand
         },
         {
-            // 使用表达式作为值
+            // 使用表达式作为值 Using expression
             proc_n: if n % 2 == 0 { proc(n) + 1 } else { 0 }, 
             [n * 12]: n * 12 // 属性名表达式 Computed Property Names
         }
