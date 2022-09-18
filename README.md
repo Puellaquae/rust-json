@@ -1,6 +1,6 @@
-# rust-json
+# rust_json
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Puellaquae/rust-json/Rust?label=Build%20%26%20Test)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Puellaquae/rust-json/Rust?label=Build%20%26%20Test) [![Latest Version](https://img.shields.io/crates/v/rust_json.svg)](https://crates.io/crates/rust_json)
 
 学习 rust 所写的 JSON 解析与序列化工具。 JSON serializer and deserializer written for learning rust.
 
