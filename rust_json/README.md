@@ -94,3 +94,21 @@ fn main() {
 ### ToJson and FromJson traits
 
 Impl the `ToJson` and `FromJson` to serialize and deserialize custom struct. Or you can use [rust_json_derive](https://crates.io/crates/rust_json_derive) to derive the traits.
+
+### Stringify with space
+
+```rust
+use rust_json::json;
+
+fn example() {
+    let j = json!({"a": 12});
+    println!("{:#}", j);
+    // { 
+    //     "a": 12
+    // }
+    println!("{:3}", j);
+    // { 
+    //    "a": 12
+    // }
+}
+```
