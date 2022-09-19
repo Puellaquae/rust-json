@@ -56,27 +56,63 @@ fn string_escape(str: &String) -> String {
 
 impl Display for JsonElem {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        match self {
-            Self::Null => write!(f, "null"),
-            Self::Bool(b) => write!(f, "{}", b),
-            Self::Number(n) => write!(f, "{}", n),
-            Self::Str(s) => write!(f, "\"{}\"", string_escape(s)),
-            Self::Array(a) => write!(
-                f,
-                "[{}]",
-                a.iter()
-                    .map(|e| e.to_string())
-                    .collect::<Vec<String>>()
-                    .join(",")
-            ),
-            Self::Object(o) => write!(
-                f,
-                "{{{}}}",
-                o.iter()
-                    .map(|(k, v)| format!("\"{}\":{}", string_escape(k), v))
-                    .collect::<Vec<String>>()
-                    .join(",")
-            ),
+        let width = f
+            .width()
+            .or_else(|| if f.alternate() { Some(4) } else { None });
+        if let Some(w) = width {
+            match self {
+                Self::Null => write!(f, "null"),
+                Self::Bool(b) => write!(f, "{}", b),
+                Self::Number(n) => write!(f, "{}", n),
+                Self::Str(s) => write!(f, "\"{}\"", string_escape(s)),
+                Self::Array(a) => write!(
+                    f,
+                    "[\n{}\n]",
+                    a.iter()
+                        .map(|e| format!("{:w$}", e))
+                        .collect::<Vec<_>>()
+                        .join(",\n")
+                        .lines()
+                        .map(|l| format!("{:w$}{}", "", l))
+                        .collect::<Vec<_>>()
+                        .join("\n")
+                ),
+                Self::Object(o) => write!(
+                    f,
+                    "{{\n{}\n}}",
+                    o.iter()
+                        .map(|(k, v)| format!("\"{}\": {:w$}", string_escape(k), v))
+                        .collect::<Vec<_>>()
+                        .join(",\n")
+                        .lines()
+                        .map(|l| format!("{:w$}{}", "", l))
+                        .collect::<Vec<_>>()
+                        .join("\n")
+                ),
+            }
+        } else {
+            match self {
+                Self::Null => write!(f, "null"),
+                Self::Bool(b) => write!(f, "{}", b),
+                Self::Number(n) => write!(f, "{}", n),
+                Self::Str(s) => write!(f, "\"{}\"", string_escape(s)),
+                Self::Array(a) => write!(
+                    f,
+                    "[{}]",
+                    a.iter()
+                        .map(|e| e.to_string())
+                        .collect::<Vec<String>>()
+                        .join(",")
+                ),
+                Self::Object(o) => write!(
+                    f,
+                    "{{{}}}",
+                    o.iter()
+                        .map(|(k, v)| format!("\"{}\":{}", string_escape(k), v))
+                        .collect::<Vec<String>>()
+                        .join(",")
+                ),
+            }
         }
     }
 }
