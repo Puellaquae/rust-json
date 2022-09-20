@@ -38,7 +38,6 @@ impl FromJson for bool {
 
 impl FromJson for String {
     fn from_json(json: JsonElem) -> Option<String> {
-        println!("FromJson for String: {}", json);
         if let JsonElem::Str(s) = json {
             Some(s)
         } else {
