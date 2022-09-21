@@ -94,6 +94,12 @@ fn test_string() {
     test_string_help("€", "\"\\u20AC\""); /* Euro sign U+20AC */
     test_string_help("𝄞", "\"\\uD834\\uDD1E\""); /* G clef sign U+1D11E */
     test_string_help("𝄞", "\"\\ud834\\udd1e\""); /* G clef sign U+1D11E */
+    test_string_help("$", "\"$\""); /* Dollar sign U+0024 */
+    test_string_help("¢", "\"¢\""); /* Cents sign U+00A2 */
+    test_string_help("€", "\"€\""); /* Euro sign U+20AC */
+    test_string_help("𝄞", "\"𝄞\""); /* G clef sign U+1D11E */
+    test_string_help("🤔", "\"🤔\"");
+    test_string_help("’", "\"’\"");
 }
 
 #[test]

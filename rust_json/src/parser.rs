@@ -111,21 +111,21 @@ fn is_digit(ch: Option<&char>) -> bool {
 }
 
 fn json_parse_string(json: &mut &str) -> Result<JsonElem, JsonParseErr> {
-    let mut str_buf: Vec<u8> = Vec::new();
+    let mut str_buf: Vec<char> = Vec::new();
     let mut chars = json.chars();
     chars.next();
     loop {
         match chars.next() {
             Some('"') => break,
             Some('\\') => match chars.next() {
-                Some('"') => str_buf.push(b'"'),
-                Some('\\') => str_buf.push(b'\\'),
-                Some('/') => str_buf.push(b'/'),
-                Some('b') => str_buf.push(8),
-                Some('f') => str_buf.push(12),
-                Some('n') => str_buf.push(b'\n'),
-                Some('r') => str_buf.push(b'\r'),
-                Some('t') => str_buf.push(b'\t'),
+                Some('"') => str_buf.push('"'),
+                Some('\\') => str_buf.push('\\'),
+                Some('/') => str_buf.push('/'),
+                Some('b') => str_buf.push('\x08'),
+                Some('f') => str_buf.push('\x0c'),
+                Some('n') => str_buf.push('\n'),
+                Some('r') => str_buf.push('\r'),
+                Some('t') => str_buf.push('\t'),
                 Some('u') => {
                     if let Some(res) = try_get_hex4(&mut chars) {
                         if (0xd800..=0xdbff).contains(&res) {
@@ -136,15 +136,21 @@ fn json_parse_string(json: &mut &str) -> Result<JsonElem, JsonParseErr> {
                                 return Err(JsonParseErr::InvalidUnicodeSurrogate);
                             }
                             if let Some(res2) = try_get_hex4(&mut chars) {
-                                encode_utf8_and_push(
-                                    (((res - 0xD800) << 10) | (res2 - 0xDC00)) + 0x10000,
-                                    &mut str_buf,
-                                )
+                                let u = (((res - 0xD800) << 10) | (res2 - 0xDC00)) + 0x10000;
+                                if let Some(ch) = char::from_u32(u) {
+                                    str_buf.push(ch)
+                                } else {
+                                    return Err(JsonParseErr::InvalidUnicodeSurrogate);
+                                }
                             } else {
                                 return Err(JsonParseErr::InvalidUnicodeSurrogate);
                             }
                         } else {
-                            encode_utf8_and_push(res, &mut str_buf);
+                            if let Some(ch) = char::from_u32(res) {
+                                str_buf.push(ch)
+                            } else {
+                                return Err(JsonParseErr::InvalidUnicodeSurrogate);
+                            }
                         }
                     } else {
                         return Err(JsonParseErr::InvalidUnicodeHex);
@@ -154,24 +160,16 @@ fn json_parse_string(json: &mut &str) -> Result<JsonElem, JsonParseErr> {
             },
             None => return Err(JsonParseErr::MissQuotationMark),
             Some(c) => {
-                if (c as u8) < 0x20 {
+                if (c as u32) < 0x20 {
                     return Err(JsonParseErr::InvalidStringChar);
                 } else {
-                    str_buf.push(c as u8)
+                    str_buf.push(c)
                 }
             }
         }
     }
     *json = chars.as_str();
-    Ok(JsonElem::Str(String::from_utf8(str_buf).unwrap()))
-}
-
-fn is_hex_digit(c: Option<char>) -> bool {
-    if let Some(ch) = c {
-        ('0'..='9').contains(&ch) || ('a'..='f').contains(&ch) || ('A'..='F').contains(&ch)
-    } else {
-        false
-    }
+    Ok(JsonElem::Str(str_buf.into_iter().collect()))
 }
 
 fn hex_to_u32(h: char) -> u32 {
@@ -184,42 +182,23 @@ fn hex_to_u32(h: char) -> u32 {
 }
 
 fn try_get_hex4(chars: &mut Chars) -> Option<u32> {
-    let c1 = chars.next();
-    let c2 = chars.next();
-    let c3 = chars.next();
-    let c4 = chars.next();
-    if is_hex_digit(c1) && is_hex_digit(c2) && is_hex_digit(c3) && is_hex_digit(c4) {
+    let c1 = chars.next()?;
+    let c2 = chars.next()?;
+    let c3 = chars.next()?;
+    let c4 = chars.next()?;
+    if c1.is_ascii_hexdigit()
+        && c2.is_ascii_hexdigit()
+        && c3.is_ascii_hexdigit()
+        && c4.is_ascii_hexdigit()
+    {
         Some(
-            (hex_to_u32(c1.unwrap()) << 12)
-                + (hex_to_u32(c2.unwrap()) << 8)
-                + (hex_to_u32(c3.unwrap()) << 4)
-                + (hex_to_u32(c4.unwrap())),
+            (hex_to_u32(c1) << 12)
+                + (hex_to_u32(c2) << 8)
+                + (hex_to_u32(c3) << 4)
+                + (hex_to_u32(c4)),
         )
     } else {
         None
-    }
-}
-
-fn u32_low_to_u8(u: u32) -> u8 {
-    u.to_le_bytes()[0]
-}
-
-fn encode_utf8_and_push(c: u32, str_buf: &mut Vec<u8>) {
-    if c <= 0x007F {
-        str_buf.push(u32_low_to_u8(c));
-    } else if c <= 0x07FF {
-        str_buf.push(u32_low_to_u8(0xC0 | ((c >> 6) & 0xFF)));
-        str_buf.push(u32_low_to_u8(0x80 | (c & 0x3F)));
-    } else if c <= 0xFFFF {
-        str_buf.push(u32_low_to_u8(0xE0 | ((c >> 12) & 0xFF)));
-        str_buf.push(u32_low_to_u8(0x80 | ((c >> 6) & 0x3F)));
-        str_buf.push(u32_low_to_u8(0x80 | (c & 0x3F)));
-    } else {
-        assert!(c <= 0x10FFFF);
-        str_buf.push(u32_low_to_u8(0xF0 | ((c >> 18) & 0xFF)));
-        str_buf.push(u32_low_to_u8(0x80 | ((c >> 12) & 0x3F)));
-        str_buf.push(u32_low_to_u8(0x80 | ((c >> 6) & 0x3F)));
-        str_buf.push(u32_low_to_u8(0x80 | (c & 0x3F)));
     }
 }
 
@@ -286,7 +265,9 @@ fn json_parse_member(json: &mut &str) -> Result<(String, JsonElem), JsonParseErr
     match json_parse_string(json) {
         Ok(JsonElem::Str(k)) => key = k,
         Err(e) => return Err(e),
-        _ => panic!("json_parse_string shouldn't return unexpected values other than JsonElemL::Str and Err")
+        _ => panic!(
+            "json_parse_string shouldn't return unexpected values other than JsonElem::Str and Err"
+        ),
     };
     *json = json.trim();
     match json.strip_prefix(':') {

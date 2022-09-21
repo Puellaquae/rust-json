@@ -1,6 +1,6 @@
 [package]
 name = "rust_json"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Puellaquae <shentukeqin@hotmail.com>"]
 edition = "2018"
 repository = "https://github.com/Puellaquae/rust-json"
