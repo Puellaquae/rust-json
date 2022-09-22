@@ -17,19 +17,19 @@ macro_rules! json {
     };
 
     (@for_array [ $($val:expr)* ] $elem:tt $($rest:tt)*) => {
-        json!(@for_array [$($val)* json!($elem)] $($rest)*)
+        $crate::json!(@for_array [$($val)* $crate::json!($elem)] $($rest)*)
     };
 
     (@for_object $obj:ident) => {
     };
 
     (@for_object $obj:ident $key:tt : $val:tt) => {
-        $obj.insert(String::from($key), json!($val));
+        $obj.insert(String::from($key), $crate::json!($val));
     };
 
     (@for_object $obj:ident $key:tt : $val:tt, $($rest:tt)*) => {
-        $obj.insert(String::from($key), json!($val));
-        json!(@for_object $obj $($rest)*)
+        $obj.insert(String::from($key), $crate::json!($val));
+        $crate::json!(@for_object $obj $($rest)*)
     };
 
     (null) => {
@@ -37,13 +37,13 @@ macro_rules! json {
     };
 
     ([ $($val:tt),* ]) => {
-        json!(@for_array [] $($val)*)
+        $crate::json!(@for_array [] $($val)*)
     };
 
     ({ $($val:tt)* }) => {
         {
             let mut hm = std::collections::HashMap::<String, $crate::JsonElem>::new();
-            json!(@for_object hm $($val)*);
+            $crate::json!(@for_object hm $($val)*);
             $crate::JsonElem::Object(hm)
         }
     };
@@ -80,38 +80,38 @@ macro_rules! js_object {
     };
 
     (@for_array [$($elem:expr)*] $val:tt , $($rest:tt)*) => {
-        js_object!(@for_array [$($elem)* js_object!($val)] $($rest)*)
+        $crate::js_object!(@for_array [$($elem)* $crate::js_object!($val)] $($rest)*)
     };
 
     (@for_array [$($elem:expr)*] $val:tt) => {
-        js_object!(@for_array [$($elem)* js_object!($val)])
+        $crate::js_object!(@for_array [$($elem)* $crate::js_object!($val)])
     };
 
     (@for_object $obj:ident $key:tt : $val:tt , $($rest:tt)*) => {
-        js_object!(@obj_insert $obj $key, js_object!($val));
-        js_object!(@for_object $obj $($rest)*)
+        $crate::js_object!(@obj_insert $obj $key, $crate::js_object!($val));
+        $crate::js_object!(@for_object $obj $($rest)*)
     };
 
     (@for_object $obj:ident $key:tt : $val:tt) => {
-        js_object!(@obj_insert $obj $key, js_object!($val))
+        $crate::js_object!(@obj_insert $obj $key, $crate::js_object!($val))
     };
 
     (@for_object $obj:ident $key:tt : $val:expr , $($rest:tt)*) => {
-        js_object!(@obj_insert $obj $key, js_object!($val));
-        js_object!(@for_object $obj $($rest)*)
+        $crate::js_object!(@obj_insert $obj $key, $crate::js_object!($val));
+        $crate::js_object!(@for_object $obj $($rest)*)
     };
 
     (@for_object $obj:ident $key:tt : $val:expr) => {
-        js_object!(@obj_insert $obj $key, js_object!($val))
+        $crate::js_object!(@obj_insert $obj $key, $crate::js_object!($val))
     };
 
     (@for_object $obj:ident $key:ident , $($rest:tt)*) => {
-        js_object!(@obj_insert $obj $key, js_object!($key));
-        js_object!(@for_object $obj $($rest)*)
+        $crate::js_object!(@obj_insert $obj $key, $crate::js_object!($key));
+        $crate::js_object!(@for_object $obj $($rest)*)
     };
 
     (@for_object $obj:ident $key:ident) => {
-        js_object!(@obj_insert $obj $key, js_object!($key))
+        $crate::js_object!(@obj_insert $obj $key, $crate::js_object!($key))
     };
 
     (@for_object $obj:ident) => {
@@ -141,13 +141,13 @@ macro_rules! js_object {
     };
 
     ([ $($val:tt)* ]) => {
-        $crate::JsonElem::Array(js_object!(@for_array [] $($val)*))
+        $crate::JsonElem::Array($crate::js_object!(@for_array [] $($val)*))
     };
 
     ({ $($val:tt)* }) => {
         {
             let mut hm = std::collections::HashMap::<String, $crate::JsonElem>::new();
-            js_object!(@for_object hm $($val)*);
+            $crate::js_object!(@for_object hm $($val)*);
             $crate::JsonElem::Object(hm)
         }
     };
