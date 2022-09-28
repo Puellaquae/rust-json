@@ -26,7 +26,10 @@ enum E {
 fn test_rename_struct() {
     let s = S { n: 12.3 };
     assert_eq!(r#"{"s^n":12.3}"#, s.to_json().to_string());
-    assert_eq!(s, s.to_json().to_string().parse::<JsonElem>().unwrap().get().unwrap());
+    assert_eq!(
+        s,
+        r#"{"s^n":12.3}"#.parse::<JsonElem>().unwrap().get().unwrap()
+    );
 }
 
 #[test]
@@ -39,40 +42,17 @@ fn test_rename_enum() {
     assert_eq!(r#"{"e.o":1}"#, o.to_json().to_string());
     assert_eq!(r#"{"t-e":[1,2]}"#, t.to_json().to_string());
     assert_eq!(r#"{"复合":{"z":1}}"#, c.to_json().to_string());
-    assert_eq!(
-        u,
-        u.to_json()
-            .to_string()
-            .parse::<JsonElem>()
-            .unwrap()
-            .get()
-            .unwrap()
-    );
+    assert_eq!(u, r#""e$u""#.parse::<JsonElem>().unwrap().get().unwrap());
     assert_eq!(
         o,
-        o.to_json()
-            .to_string()
-            .parse::<JsonElem>()
-            .unwrap()
-            .get()
-            .unwrap()
+        r#"{"e.o":1}"#.parse::<JsonElem>().unwrap().get().unwrap()
     );
     assert_eq!(
         t,
-        t.to_json()
-            .to_string()
-            .parse::<JsonElem>()
-            .unwrap()
-            .get()
-            .unwrap()
+        r#"{"t-e":[1,2]}"#.parse::<JsonElem>().unwrap().get().unwrap()
     );
     assert_eq!(
         c,
-        c.to_json()
-            .to_string()
-            .parse::<JsonElem>()
-            .unwrap()
-            .get()
-            .unwrap()
+        r#"{"复合":{"z":1}}"#.parse::<JsonElem>().unwrap().get().unwrap()
     );
 }

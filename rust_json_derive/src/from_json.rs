@@ -1,13 +1,18 @@
 use proc_macro2::Span;
 use quote::quote;
-use syn::{Data, DeriveInput, DataEnum, DataStruct, Fields, Ident, Variant, Result, Error};
+use syn::{Data, DataEnum, DataStruct, DeriveInput, Error, Fields, Ident, Result, Variant};
+
+use crate::attrs;
 
 pub fn expand_deserialize(input: DeriveInput) -> Result<proc_macro2::TokenStream> {
     let ident = input.ident;
     match input.data {
         Data::Struct(struct_data) => Ok(deserialize_struct(ident, struct_data)),
         Data::Enum(enum_data) => Ok(deserialize_enum(ident, enum_data)),
-        Data::Union(_) => Err(Error::new(ident.span(), "rust_json_derive not support union!")),
+        Data::Union(_) => Err(Error::new(
+            ident.span(),
+            "rust_json_derive not support union!",
+        )),
     }
 }
 
@@ -59,8 +64,13 @@ fn deserialize_fields(ident: &Ident, fields: Fields) -> proc_macro2::TokenStream
         Fields::Named(_) => {
             let s = fields
                 .iter()
-                .map(|f| f.ident.as_ref())
-                .map(|i| quote!(#i: obj.remove(stringify!(#i)).unwrap().get().unwrap()));
+                .map(|f| {
+                    (
+                        attrs::get_name_from_attrs(&f.attrs, f.ident.as_ref().unwrap().to_string()),
+                        f.ident.as_ref(),
+                    )
+                })
+                .map(|(name, i)| quote!(#i: obj.remove(#name).unwrap().get().unwrap()));
             quote!(
                 if let rust_json::JsonElem::Object(mut obj) = json {
                     Some(#ident{#(#s,)*})
@@ -120,7 +130,8 @@ fn deserialize_enum_units(ident: &Ident, enum_data: &DataEnum) -> proc_macro2::T
 
 fn deserialize_enum_unit(ident: &Ident, variant: &Variant) -> proc_macro2::TokenStream {
     let var_ident = &variant.ident;
-    quote!(stringify!(#var_ident) => Some(#ident::#var_ident),)
+    let name = attrs::get_name_from_attrs(&variant.attrs, var_ident.to_string());
+    quote!(#name => Some(#ident::#var_ident),)
 }
 
 fn deserialize_enum_tags(ident: &Ident, enum_data: &DataEnum) -> proc_macro2::TokenStream {
@@ -135,6 +146,7 @@ fn deserialize_enum_tags(ident: &Ident, enum_data: &DataEnum) -> proc_macro2::To
 fn deserialize_enum_tag(ident: &Ident, variant: &Variant) -> proc_macro2::TokenStream {
     let var_ident = &variant.ident;
     let fields = &variant.fields;
+    let name = attrs::get_name_from_attrs(&variant.attrs, var_ident.to_string());
     let val = match fields {
         Fields::Unnamed(_) if fields.len() == 1 => {
             let ty = &fields.iter().next().unwrap().ty;
@@ -167,8 +179,13 @@ fn deserialize_enum_tag(ident: &Ident, variant: &Variant) -> proc_macro2::TokenS
         Fields::Named(_) => {
             let s = fields
                 .iter()
-                .map(|f| f.ident.as_ref())
-                .map(|i| quote!(#i: obj.remove(stringify!(#i)).unwrap().get().unwrap()));
+                .map(|f| {
+                    (
+                        attrs::get_name_from_attrs(&f.attrs, f.ident.as_ref().unwrap().to_string()),
+                        f.ident.as_ref(),
+                    )
+                })
+                .map(|(name, i)| quote!(#i: obj.remove(#name).unwrap().get().unwrap()));
             quote!(
                 if let rust_json::JsonElem::Object(mut obj) = __val {
                     Some(#ident::#var_ident{#(#s,)*})
@@ -179,5 +196,5 @@ fn deserialize_enum_tag(ident: &Ident, variant: &Variant) -> proc_macro2::TokenS
         }
         Fields::Unit => unreachable!(),
     };
-    quote!(stringify!(#var_ident) => #val,)
+    quote!(#name => #val,)
 }

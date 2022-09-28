@@ -12,6 +12,7 @@ use rust_json_derive::ToJson;
 #[derive(ToJson)]
 struct Simple {
     n: f64,
+    #[rename = "sim.b"]
     b: bool,
 }
 
@@ -23,10 +24,16 @@ struct Nest {
 
 #[derive(ToJson)]
 enum Enum {
+    #[rename = "u"]
     Unit,
     One(i32),
     Two(i32, i32),
-    Cmpx { a: i32, b: i32, c: i32 },
+    Cmpx { 
+        a: i32, 
+        b: i32, 
+        #[rename = "z"]
+        c: i32,
+    },
 }
 
 fn main() {
@@ -58,6 +65,7 @@ use rust_json_derive::FromJson;
 #[derive(Debug, FromJson)]
 struct Simple {
     n: f64,
+    #[rename = "sim.b"]
     b: bool,
 }
 
@@ -69,14 +77,20 @@ struct Nest {
 
 #[derive(Debug, FromJson)]
 enum Enum {
+    #[rename = "u"]
     Unit,
     One(i32),
     Two(i32, i32),
-    Cmpx { a: i32, b: i32, c: i32 },
+    Cmpx { 
+        a: i32, 
+        b: i32, 
+        #[rename = "z"]
+        c: i32,
+    },
 }
 
 fn main() {
-    println!("{:?}", json_parse(r#"{"n": 12.3, "b": true}"#).get::<Simple>());
+    println!("{:?}", json_parse(r#"{"n": 12.3, "sim.b": true}"#).get::<Simple>());
 
     println!("{:?}", json_parse(r#"
     {
@@ -85,7 +99,7 @@ fn main() {
     }
     "#).get::<Nest>());
 
-    println!("{:?}", json_parse(r#""Unit""#).get::<Enum>());
+    println!("{:?}", json_parse(r#""u""#).get::<Enum>());
     
     println!("{:?}", json_parse(r#"{"One": 1}"#).get::<Enum>());
 
@@ -97,7 +111,7 @@ fn main() {
 
     println!("{:?}", json_parse(r#"
     {
-        "Cmpx": {"a": 1, "b": 2, "c": 3}
+        "Cmpx": {"a": 1, "b": 2, "z": 3}
     }
     "#).get::<Enum>());
 }
