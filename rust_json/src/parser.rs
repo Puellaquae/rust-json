@@ -145,12 +145,10 @@ fn json_parse_string(json: &mut &str) -> Result<JsonElem, JsonParseErr> {
                             } else {
                                 return Err(JsonParseErr::InvalidUnicodeSurrogate);
                             }
+                        } else if let Some(ch) = char::from_u32(res) {
+                            str_buf.push(ch)
                         } else {
-                            if let Some(ch) = char::from_u32(res) {
-                                str_buf.push(ch)
-                            } else {
-                                return Err(JsonParseErr::InvalidUnicodeSurrogate);
-                            }
+                            return Err(JsonParseErr::InvalidUnicodeSurrogate);
                         }
                     } else {
                         return Err(JsonParseErr::InvalidUnicodeHex);

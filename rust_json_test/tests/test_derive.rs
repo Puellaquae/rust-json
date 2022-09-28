@@ -37,7 +37,7 @@ fn test_derive_to_json_struct() {
 
     let n = N {
         a: vec![1.2, 2.3],
-        s: s,
+        s,
     };
     assert_eq!(
         json!({"a":[1.2,2.3], "s": {"n": 12.3, "b": true}}),
@@ -76,7 +76,7 @@ fn test_derive_from_json_struct() {
 
     let n = N {
         a: vec![1.2, 2.3],
-        s: s,
+        s,
     };
     assert_eq!(n, n.to_json().get().unwrap());
 

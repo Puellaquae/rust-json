@@ -109,7 +109,7 @@ impl ops::Index<&str> for JsonElem {
     type Output = JsonElem;
     fn index(&self, idx: &str) -> &Self::Output {
         match self {
-            JsonElem::Object(o) if o.contains_key(idx.into()) => &o[idx.into()],
+            JsonElem::Object(o) if o.contains_key(idx) => &o[idx],
             _ => &JsonElem::Null,
         }
     }
